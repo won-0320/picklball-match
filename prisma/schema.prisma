@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GroupTier {
+  UPPER
+  LOWER
+}
+
+enum TeamCode {
+  A
+  B
+}
+
+enum MatchStatus {
+  PENDING
+  COMPLETED
+}
+
+model Team {
+  id    String   @id @default(cuid())
+  code  TeamCode @unique
+  pairs Pair[]
+}
+
+model Pair {
+  id          String    @id @default(cuid())
+  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId      String
+  groupTier   GroupTier
+  pairNumber  Int
+  player1Name String
+  player2Name String
+
+  matchesAsA Match[] @relation("PairA")
+  matchesAsB Match[] @relation("PairB")
+
+  @@unique([teamId, groupTier, pairNumber])
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  groupTier   GroupTier
+  teamAPair   Pair        @relation("PairA", fields: [teamAPairId], references: [id], onDelete: Cascade)
+  teamAPairId String
+  teamBPair   Pair        @relation("PairB", fields: [teamBPairId], references: [id], onDelete: Cascade)
+  teamBPairId String
+  teamAScore  Int?
+  teamBScore  Int?
+  status      MatchStatus @default(PENDING)
+  winner      TeamCode?
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+}
