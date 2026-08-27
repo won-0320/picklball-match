@@ -83,24 +83,11 @@ export function validateRosterRows(
     return { success: false, rows: [], errors };
   }
 
-  // Warn (non-fatal is not an option here since we want a single pass;
-  // treat a group tier with pairs only on one team's side as a hard error,
-  // since it would silently produce zero matches for that tier)
-  for (const groupTier of ["UPPER", "LOWER"] as const) {
-    const aCount = validRows.filter((r) => r.team === "A" && r.groupTier === groupTier).length;
-    const bCount = validRows.filter((r) => r.team === "B" && r.groupTier === groupTier).length;
-    const groupLabel = GROUP_TIER_LABEL[groupTier];
-    if (aCount === 0 && bCount === 0) continue; // tier simply unused, fine
-    if (aCount === 0 || bCount === 0) {
-      errors.push(
-        `${groupLabel} 그룹은 한쪽 팀에만 조가 있어 대진을 생성할 수 없습니다 (A팀 ${aCount}조, B팀 ${bCount}조).`
-      );
-    }
-  }
-
-  if (errors.length > 0) {
-    return { success: false, rows: [], errors };
-  }
+  // Note: it's intentionally fine for a submission to contain only one
+  // team's rows (e.g. saving A's roster before B's is ready) — saveRosterRows
+  // only replaces the team(s) present in this submission, and a group tier
+  // with pairs on only one side simply won't produce matches until the
+  // other side is saved too (visible in the admin schedule-generator summary).
 
   return { success: true, rows: validRows, errors: [] };
 }

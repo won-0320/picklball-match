@@ -9,33 +9,30 @@ export interface SaveRosterResult {
 }
 
 /**
- * Wipes the current tournament's pairs/matches and replaces them with the
- * given roster rows. Does NOT generate the match schedule — that is a
- * separate explicit step (see generateSchedule) so an admin can review or
- * re-save the roster before committing to a bracket. Runs as a single
- * transaction so a failure at any step leaves the previous dataset intact.
+ * Replaces the roster for whichever team(s) are present in the given rows,
+ * leaving the other team's previously saved pairs untouched — so A and B
+ * can be saved independently, at different times, without one submission
+ * wiping the other. Deleting a team's pairs cascades to delete any matches
+ * that referenced them (every match spans both teams, so any roster change
+ * invalidates the existing schedule; re-run "대진 생성" afterwards).
+ * Does NOT generate the match schedule itself — that's a separate explicit
+ * step (see generateSchedule). Runs as a single transaction so a failure at
+ * any step leaves the previous dataset intact.
  */
 export async function saveRosterRows(rows: NormalizedRosterRow[]): Promise<SaveRosterResult> {
+  const teamsInSubmission = Array.from(new Set(rows.map((row) => row.team)));
+
   return prisma.$transaction(async (tx) => {
-    // Existing matches reference the pairs being replaced, so they must go too.
-    await tx.match.deleteMany({});
-    await tx.pair.deleteMany({});
+    await tx.team.upsert({ where: { code: "A" }, create: { code: "A" }, update: {} });
+    await tx.team.upsert({ where: { code: "B" }, create: { code: "B" }, update: {} });
 
-    const teamA = await tx.team.upsert({
-      where: { code: "A" },
-      create: { code: "A" },
-      update: {},
-    });
-    const teamB = await tx.team.upsert({
-      where: { code: "B" },
-      create: { code: "B" },
-      update: {},
-    });
+    await tx.pair.deleteMany({ where: { team: { code: { in: teamsInSubmission } } } });
 
-    const teamIdByCode: Record<TeamCode, string> = {
-      A: teamA.id,
-      B: teamB.id,
-    };
+    const teams = await tx.team.findMany({ where: { code: { in: teamsInSubmission } } });
+    const teamIdByCode = Object.fromEntries(teams.map((team) => [team.code, team.id])) as Record<
+      TeamCode,
+      string
+    >;
 
     await tx.pair.createMany({
       data: rows.map((row) => ({
@@ -47,8 +44,10 @@ export async function saveRosterRows(rows: NormalizedRosterRow[]): Promise<SaveR
       })),
     });
 
-    const teamACount = rows.filter((row) => row.team === "A").length;
-    const teamBCount = rows.filter((row) => row.team === "B").length;
+    const [teamACount, teamBCount] = await Promise.all([
+      tx.pair.count({ where: { team: { code: "A" } } }),
+      tx.pair.count({ where: { team: { code: "B" } } }),
+    ]);
 
     return { teamACount, teamBCount };
   });
