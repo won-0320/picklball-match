@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import StandingsBanner from "@/components/StandingsBanner";
 import GroupSection from "@/components/GroupSection";
@@ -37,6 +38,11 @@ export default function MatchListClient({
           }}
         />
       )}
+      <div className="text-center pt-4">
+        <Link href="/admin/login" className="text-xs text-gray-400 underline">
+          관리자 로그인
+        </Link>
+      </div>
     </main>
   );
 }
