@@ -9,9 +9,16 @@ const TEAM_LABEL_TO_CODE: Record<string, "A" | "B"> = {
   "B팀": "B",
 };
 
+export const GROUP_TIER_LABEL: Record<"UPPER" | "LOWER", string> = {
+  UPPER: "3.5 이상",
+  LOWER: "3.0 이하",
+};
+
 const GROUP_LABEL_TO_TIER: Record<string, "UPPER" | "LOWER"> = {
-  상위: "UPPER",
-  하위: "LOWER",
+  "3.5 이상": "UPPER",
+  "3.5이상": "UPPER",
+  "3.0 이하": "LOWER",
+  "3.0이하": "LOWER",
 };
 
 export const RAW_ROSTER_HEADERS = ["팀", "그룹", "조번호", "선수1", "선수2"] as const;
@@ -64,7 +71,9 @@ export function validateRosterRow(
 
   const groupTier = GROUP_LABEL_TO_TIER[groupLabel];
   if (!groupTier) {
-    errors.push(`${rowNumber}행: 그룹 값은 '상위' 또는 '하위'여야 합니다 (입력값: '${groupLabel}')`);
+    errors.push(
+      `${rowNumber}행: 그룹 값은 '${GROUP_TIER_LABEL.UPPER}' 또는 '${GROUP_TIER_LABEL.LOWER}'여야 합니다 (입력값: '${groupLabel}')`
+    );
   }
 
   const pairNumberParsed = z.coerce

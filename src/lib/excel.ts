@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import {
   validateRosterRow,
+  GROUP_TIER_LABEL,
   type NormalizedRosterRow,
   type RawRosterRow,
 } from "@/lib/validation";
@@ -70,8 +71,8 @@ export function validateRosterRows(
   });
   for (const [key, count] of seen) {
     if (count > 1) {
-      const [team, groupTier, pairNumber] = key.split("-");
-      const groupLabel = groupTier === "UPPER" ? "상위" : "하위";
+      const [team, groupTier, pairNumber] = key.split("-") as [string, "UPPER" | "LOWER", string];
+      const groupLabel = GROUP_TIER_LABEL[groupTier];
       errors.push(
         `팀 ${team} ${groupLabel} 그룹에 조번호 ${pairNumber}가 ${count}번 중복되었습니다.`
       );
@@ -88,7 +89,7 @@ export function validateRosterRows(
   for (const groupTier of ["UPPER", "LOWER"] as const) {
     const aCount = validRows.filter((r) => r.team === "A" && r.groupTier === groupTier).length;
     const bCount = validRows.filter((r) => r.team === "B" && r.groupTier === groupTier).length;
-    const groupLabel = groupTier === "UPPER" ? "상위" : "하위";
+    const groupLabel = GROUP_TIER_LABEL[groupTier];
     if (aCount === 0 && bCount === 0) continue; // tier simply unused, fine
     if (aCount === 0 || bCount === 0) {
       errors.push(

@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { submitManualRoster } from "@/actions/roster-actions";
+import { GROUP_TIER_LABEL } from "@/lib/validation";
+
+type GroupLabel = (typeof GROUP_TIER_LABEL)["UPPER" | "LOWER"];
 
 interface ManualRow {
   key: number;
   team: "A" | "B";
-  groupLabel: "상위" | "하위";
+  groupLabel: GroupLabel;
   pairNumber: string;
   player1Name: string;
   player2Name: string;
@@ -19,7 +22,7 @@ function emptyRow(): ManualRow {
   return {
     key: nextKey++,
     team: "A",
-    groupLabel: "상위",
+    groupLabel: GROUP_TIER_LABEL.UPPER,
     pairNumber: "",
     player1Name: "",
     player2Name: "",
@@ -108,12 +111,12 @@ export default function ManualRosterForm() {
                   <select
                     value={row.groupLabel}
                     onChange={(e) =>
-                      updateRow(row.key, { groupLabel: e.target.value as "상위" | "하위" })
+                      updateRow(row.key, { groupLabel: e.target.value as GroupLabel })
                     }
                     className="border rounded px-1 py-0.5"
                   >
-                    <option value="상위">상위</option>
-                    <option value="하위">하위</option>
+                    <option value={GROUP_TIER_LABEL.UPPER}>{GROUP_TIER_LABEL.UPPER}</option>
+                    <option value={GROUP_TIER_LABEL.LOWER}>{GROUP_TIER_LABEL.LOWER}</option>
                   </select>
                 </td>
                 <td className="pr-2 py-1">

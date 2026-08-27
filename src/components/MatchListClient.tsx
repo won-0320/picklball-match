@@ -26,8 +26,8 @@ export default function MatchListClient({
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 space-y-8 w-full">
       <StandingsBanner standings={current.standings} />
-      <GroupSection title="상위 그룹" matches={current.upper} onSelectMatch={setActiveMatch} />
-      <GroupSection title="하위 그룹" matches={current.lower} onSelectMatch={setActiveMatch} />
+      <GroupSection title="3.5 이상 그룹" matches={current.upper} onSelectMatch={setActiveMatch} />
+      <GroupSection title="3.0 이하 그룹" matches={current.lower} onSelectMatch={setActiveMatch} />
       {activeMatch && (
         <ScoreEntryModal
           match={activeMatch}

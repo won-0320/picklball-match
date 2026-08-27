@@ -11,7 +11,7 @@ export default function AdminMatchList({
   return (
     <section className="space-y-6">
       <div>
-        <h2 className="font-semibold mb-2">상위 그룹 ({upper.length}경기)</h2>
+        <h2 className="font-semibold mb-2">3.5 이상 그룹 ({upper.length}경기)</h2>
         <div className="space-y-2">
           {upper.length === 0 && <p className="text-sm text-gray-500">경기가 없습니다.</p>}
           {upper.map((match) => (
@@ -20,7 +20,7 @@ export default function AdminMatchList({
         </div>
       </div>
       <div>
-        <h2 className="font-semibold mb-2">하위 그룹 ({lower.length}경기)</h2>
+        <h2 className="font-semibold mb-2">3.0 이하 그룹 ({lower.length}경기)</h2>
         <div className="space-y-2">
           {lower.length === 0 && <p className="text-sm text-gray-500">경기가 없습니다.</p>}
           {lower.map((match) => (

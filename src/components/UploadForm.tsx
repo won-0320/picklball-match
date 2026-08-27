@@ -12,7 +12,7 @@ export default function UploadForm() {
     <section className="border rounded-lg p-4 space-y-3 bg-white">
       <h2 className="font-semibold">엑셀 업로드</h2>
       <p className="text-xs text-gray-500">
-        컬럼: 팀(A/B), 그룹(상위/하위), 조번호, 선수1, 선수2. 업로드 시 기존 조 편성과 대진표는
+        컬럼: 팀(A/B), 그룹(3.5 이상/3.0 이하), 조번호, 선수1, 선수2. 업로드 시 기존 조 편성과 대진표는
         모두 삭제되고 새로 생성됩니다.
       </p>
       <form action={action} className="flex items-center gap-3 flex-wrap">
