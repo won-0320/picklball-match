@@ -70,7 +70,7 @@ export default function ManualRosterForm() {
     }
 
     setSuccessMessage(
-      `저장 완료: A팀 ${result.data!.teamACount}조, B팀 ${result.data!.teamBCount}조, 매치 ${result.data!.matchCount}개 생성됨`
+      `명단 저장 완료: A팀 ${result.data!.teamACount}조, B팀 ${result.data!.teamBCount}조. 대진표는 아래 "대진 생성"에서 별도로 만들어주세요.`
     );
     router.refresh();
   }
@@ -80,7 +80,7 @@ export default function ManualRosterForm() {
       <h2 className="font-semibold">직접 입력</h2>
       <p className="text-xs text-gray-500">
         엑셀 파일이 없을 때 팀 명단을 직접 입력할 수 있습니다. 저장 시 기존 조 편성과 대진표는
-        모두 삭제되고 새로 생성됩니다.
+        모두 삭제됩니다. 대진표는 저장 후 아래 &quot;대진 생성&quot;에서 별도로 만들어주세요.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
@@ -168,7 +168,7 @@ export default function ManualRosterForm() {
           disabled={pending}
           className="px-3 py-1.5 rounded bg-blue-600 text-white text-sm disabled:opacity-50"
         >
-          {pending ? "저장 중..." : "명단 저장 및 대진 생성"}
+          {pending ? "저장 중..." : "명단 저장"}
         </button>
       </div>
       {errors && errors.length > 0 && (

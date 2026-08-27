@@ -2,12 +2,12 @@
 
 import { isAdminAuthenticated } from "@/lib/auth";
 import { parseRosterFile, validateRosterRows } from "@/lib/excel";
-import { applyRosterRows, type ApplyRosterResult } from "@/lib/roster";
+import { saveRosterRows, generateSchedule, type SaveRosterResult } from "@/lib/roster";
 import type { RawRosterRow } from "@/lib/validation";
 
 export interface UploadRosterState {
   errors?: string[];
-  success?: ApplyRosterResult;
+  success?: SaveRosterResult;
 }
 
 export async function uploadRoster(
@@ -30,14 +30,14 @@ export async function uploadRoster(
     return { errors: parsed.errors };
   }
 
-  const success = await applyRosterRows(parsed.rows);
+  const success = await saveRosterRows(parsed.rows);
   return { success };
 }
 
 export interface SubmitManualRosterResult {
   success: boolean;
   errors?: string[];
-  data?: ApplyRosterResult;
+  data?: SaveRosterResult;
 }
 
 export async function submitManualRoster(
@@ -56,6 +56,21 @@ export async function submitManualRoster(
     return { success: false, errors: parsed.errors };
   }
 
-  const data = await applyRosterRows(parsed.rows);
+  const data = await saveRosterRows(parsed.rows);
   return { success: true, data };
+}
+
+export interface GenerateMatchesResult {
+  success: boolean;
+  message?: string;
+  matchCount?: number;
+}
+
+export async function generateMatches(): Promise<GenerateMatchesResult> {
+  if (!(await isAdminAuthenticated())) {
+    return { success: false, message: "관리자 인증이 필요합니다." };
+  }
+
+  const { matchCount } = await generateSchedule();
+  return { success: true, matchCount };
 }
