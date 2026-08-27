@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/auth";
 import { logoutAdmin } from "@/actions/auth-actions";
 import { getMatchListData } from "@/lib/matches";
 import UploadForm from "@/components/UploadForm";
+import ManualRosterForm from "@/components/ManualRosterForm";
 import AdminMatchList from "@/components/AdminMatchList";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,7 @@ export default async function AdminPage() {
         </form>
       </div>
       <UploadForm />
+      <ManualRosterForm />
       <AdminMatchList upper={data.upper} lower={data.lower} />
     </main>
   );

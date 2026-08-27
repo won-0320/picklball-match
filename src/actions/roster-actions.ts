@@ -1,18 +1,13 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { parseRosterFile } from "@/lib/excel";
-import { buildMatchesToCreate, type PairForSchedule } from "@/lib/schedule";
-import type { TeamCode } from "@/generated/prisma/enums";
+import { parseRosterFile, validateRosterRows } from "@/lib/excel";
+import { applyRosterRows, type ApplyRosterResult } from "@/lib/roster";
+import type { RawRosterRow } from "@/lib/validation";
 
 export interface UploadRosterState {
   errors?: string[];
-  success?: {
-    teamACount: number;
-    teamBCount: number;
-    matchCount: number;
-  };
+  success?: ApplyRosterResult;
 }
 
 export async function uploadRoster(
@@ -35,65 +30,32 @@ export async function uploadRoster(
     return { errors: parsed.errors };
   }
 
-  const rows = parsed.rows;
+  const success = await applyRosterRows(parsed.rows);
+  return { success };
+}
 
-  const result = await prisma.$transaction(async (tx) => {
-    await tx.match.deleteMany({});
-    await tx.pair.deleteMany({});
+export interface SubmitManualRosterResult {
+  success: boolean;
+  errors?: string[];
+  data?: ApplyRosterResult;
+}
 
-    const teamA = await tx.team.upsert({
-      where: { code: "A" },
-      create: { code: "A" },
-      update: {},
-    });
-    const teamB = await tx.team.upsert({
-      where: { code: "B" },
-      create: { code: "B" },
-      update: {},
-    });
+export async function submitManualRoster(
+  rawRows: RawRosterRow[]
+): Promise<SubmitManualRosterResult> {
+  if (!(await isAdminAuthenticated())) {
+    return { success: false, errors: ["관리자 인증이 필요합니다."] };
+  }
 
-    const teamIdByCode: Record<TeamCode, string> = {
-      A: teamA.id,
-      B: teamB.id,
-    };
-    const teamCodeById: Record<string, TeamCode> = {
-      [teamA.id]: "A",
-      [teamB.id]: "B",
-    };
+  if (rawRows.length === 0) {
+    return { success: false, errors: ["최소 한 개 이상의 조를 입력해주세요."] };
+  }
 
-    await tx.pair.createMany({
-      data: rows.map((row) => ({
-        teamId: teamIdByCode[row.team],
-        groupTier: row.groupTier,
-        pairNumber: row.pairNumber,
-        player1Name: row.player1Name,
-        player2Name: row.player2Name,
-      })),
-    });
+  const parsed = validateRosterRows(rawRows);
+  if (!parsed.success) {
+    return { success: false, errors: parsed.errors };
+  }
 
-    const createdPairs = await tx.pair.findMany({
-      select: { id: true, teamId: true, groupTier: true },
-    });
-
-    const pairsForSchedule: PairForSchedule[] = createdPairs.map((pair) => ({
-      id: pair.id,
-      team: teamCodeById[pair.teamId],
-      groupTier: pair.groupTier,
-    }));
-
-    const matchesToCreate = buildMatchesToCreate(pairsForSchedule);
-
-    await tx.match.createMany({ data: matchesToCreate });
-
-    const teamACount = rows.filter((row) => row.team === "A").length;
-    const teamBCount = rows.filter((row) => row.team === "B").length;
-
-    return {
-      teamACount,
-      teamBCount,
-      matchCount: matchesToCreate.length,
-    };
-  });
-
-  return { success: result };
+  const data = await applyRosterRows(parsed.rows);
+  return { success: true, data };
 }

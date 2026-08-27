@@ -12,13 +12,10 @@ export interface ParseRosterResult {
 }
 
 /**
- * Parses and fully validates a roster Excel file before any DB write.
- * Every row is checked; all errors are collected so the admin can fix
- * everything in one pass instead of a fix-one-error-at-a-time loop.
+ * Parses a roster Excel file into raw rows and hands off to
+ * validateRosterRows for the actual validation.
  */
 export function parseRosterFile(buffer: Buffer): ParseRosterResult {
-  const errors: string[] = [];
-
   let workbook: XLSX.WorkBook;
   try {
     workbook = XLSX.read(buffer, { type: "buffer" });
@@ -38,9 +35,25 @@ export function parseRosterFile(buffer: Buffer): ParseRosterResult {
     return { success: false, rows: [], errors: ["엑셀 파일에 데이터 행이 없습니다."] };
   }
 
+  // header is row 1, so data rows start at row 2
+  return validateRosterRows(rawRows, 2);
+}
+
+/**
+ * Fully validates a collection of raw roster rows (from an Excel file or
+ * from the manual-entry form) before any DB write. Every row is checked;
+ * all errors are collected so the admin can fix everything in one pass
+ * instead of a fix-one-error-at-a-time loop.
+ */
+export function validateRosterRows(
+  rawRows: RawRosterRow[],
+  startRow: number = 1
+): ParseRosterResult {
+  const errors: string[] = [];
+
   const validRows: NormalizedRosterRow[] = [];
   rawRows.forEach((raw, index) => {
-    const rowNumber = index + 2; // header is row 1
+    const rowNumber = index + startRow;
     const result = validateRosterRow(raw, rowNumber);
     if (result.errors.length > 0) {
       errors.push(...result.errors);
