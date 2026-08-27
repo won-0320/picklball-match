@@ -1,23 +1,36 @@
 import { prisma } from "@/lib/prisma";
+import { getPointsPerWin } from "@/lib/settings";
 
 export interface Standings {
-  teamAWins: number;
-  teamBWins: number;
+  teamAWinCount: number;
+  teamBWinCount: number;
+  teamAPoints: number;
+  teamBPoints: number;
+  pointsPerWin: number;
 }
 
 export async function computeStandings(): Promise<Standings> {
-  const results = await prisma.match.groupBy({
-    by: ["winner"],
-    where: { status: "COMPLETED" },
-    _count: { _all: true },
-  });
+  const [results, pointsPerWin] = await Promise.all([
+    prisma.match.groupBy({
+      by: ["winner"],
+      where: { status: "COMPLETED" },
+      _count: { _all: true },
+    }),
+    getPointsPerWin(),
+  ]);
 
-  let teamAWins = 0;
-  let teamBWins = 0;
+  let teamAWinCount = 0;
+  let teamBWinCount = 0;
   for (const result of results) {
-    if (result.winner === "A") teamAWins = result._count._all;
-    if (result.winner === "B") teamBWins = result._count._all;
+    if (result.winner === "A") teamAWinCount = result._count._all;
+    if (result.winner === "B") teamBWinCount = result._count._all;
   }
 
-  return { teamAWins, teamBWins };
+  return {
+    teamAWinCount,
+    teamBWinCount,
+    teamAPoints: teamAWinCount * pointsPerWin,
+    teamBPoints: teamBWinCount * pointsPerWin,
+    pointsPerWin,
+  };
 }

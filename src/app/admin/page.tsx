@@ -6,6 +6,7 @@ import { getRosterSummary } from "@/lib/roster";
 import UploadForm from "@/components/UploadForm";
 import ManualRosterForm from "@/components/ManualRosterForm";
 import ScheduleGenerator from "@/components/ScheduleGenerator";
+import SettingsForm from "@/components/SettingsForm";
 import AdminMatchList from "@/components/AdminMatchList";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,7 @@ export default async function AdminPage() {
       <UploadForm />
       <ManualRosterForm />
       <ScheduleGenerator summary={rosterSummary} />
+      <SettingsForm pointsPerWin={data.standings.pointsPerWin} />
       <AdminMatchList upper={data.upper} lower={data.lower} />
     </main>
   );

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { computeStandings } from "@/lib/standings";
+import { computeStandings, type Standings } from "@/lib/standings";
 import type { GroupTier, MatchStatus } from "@/generated/prisma/enums";
 
 export interface MatchPairDTO {
@@ -19,7 +19,7 @@ export interface MatchDTO {
 }
 
 export interface MatchListData {
-  standings: { teamAWins: number; teamBWins: number };
+  standings: Standings;
   upper: MatchDTO[];
   lower: MatchDTO[];
 }
