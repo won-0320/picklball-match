@@ -2,7 +2,12 @@
 
 import { isAdminAuthenticated } from "@/lib/auth";
 import { parseRosterFile, validateRosterRows } from "@/lib/excel";
-import { saveRosterRows, generateSchedule, type SaveRosterResult } from "@/lib/roster";
+import {
+  saveRosterRows,
+  generateSchedule,
+  clearRoster,
+  type SaveRosterResult,
+} from "@/lib/roster";
 import type { RawRosterRow } from "@/lib/validation";
 
 export interface UploadRosterState {
@@ -73,4 +78,18 @@ export async function generateMatches(): Promise<GenerateMatchesResult> {
 
   const { matchCount } = await generateSchedule();
   return { success: true, matchCount };
+}
+
+export interface ClearRosterResult {
+  success: boolean;
+  message?: string;
+}
+
+export async function clearRosterAction(): Promise<ClearRosterResult> {
+  if (!(await isAdminAuthenticated())) {
+    return { success: false, message: "관리자 인증이 필요합니다." };
+  }
+
+  await clearRoster();
+  return { success: true };
 }

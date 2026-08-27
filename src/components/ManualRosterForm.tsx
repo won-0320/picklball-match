@@ -79,8 +79,9 @@ export default function ManualRosterForm() {
     <section className="border rounded-lg p-4 space-y-3 bg-white">
       <h2 className="font-semibold">직접 입력</h2>
       <p className="text-xs text-gray-500">
-        엑셀 파일이 없을 때 팀 명단을 직접 입력할 수 있습니다. 저장 시 기존 조 편성과 대진표는
-        모두 삭제됩니다. 대진표는 저장 후 아래 &quot;대진 생성&quot;에서 별도로 만들어주세요.
+        엑셀 파일이 없을 때 팀 명단을 직접 입력할 수 있습니다. 같은 팀/그룹/조번호가 이미 있으면
+        선수 이름만 갱신되고, 새로운 조는 추가됩니다 — 기존에 저장된 다른 조는 지워지지 않습니다.
+        대진표는 저장 후 아래 &quot;대진 생성&quot;에서 별도로 만들어주세요.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">

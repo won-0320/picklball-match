@@ -23,8 +23,9 @@ export default function UploadForm() {
     <section className="border rounded-lg p-4 space-y-3 bg-white">
       <h2 className="font-semibold">엑셀 업로드</h2>
       <p className="text-xs text-gray-500">
-        컬럼: 팀(A/B), 그룹(3.5 이상/3.0 이하), 조번호, 선수1, 선수2. 업로드 시 기존 조 편성과 대진표는
-        모두 삭제됩니다. 대진표는 저장 후 아래 &quot;대진 생성&quot;에서 별도로 만들어주세요.
+        컬럼: 팀(A/B), 그룹(3.5 이상/3.0 이하), 조번호, 선수1, 선수2. 같은 팀/그룹/조번호가 이미
+        있으면 선수 이름만 갱신되고, 새로운 조는 추가됩니다 — 기존에 저장된 다른 조는 지워지지
+        않습니다. 대진표는 저장 후 아래 &quot;대진 생성&quot;에서 별도로 만들어주세요.
       </p>
       <form action={action} className="flex items-center gap-3 flex-wrap">
         <input type="file" name="file" accept=".xlsx,.xls" required className="text-sm" />

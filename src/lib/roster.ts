@@ -9,48 +9,63 @@ export interface SaveRosterResult {
 }
 
 /**
- * Replaces the roster for whichever team(s) are present in the given rows,
- * leaving the other team's previously saved pairs untouched — so A and B
- * can be saved independently, at different times, without one submission
- * wiping the other. Deleting a team's pairs cascades to delete any matches
- * that referenced them (every match spans both teams, so any roster change
- * invalidates the existing schedule; re-run "대진 생성" afterwards).
- * Does NOT generate the match schedule itself — that's a separate explicit
- * step (see generateSchedule). Runs as a single transaction so a failure at
- * any step leaves the previous dataset intact.
+ * Adds/updates the given roster rows without deleting anything that isn't
+ * mentioned in this submission. Each row is upserted by its
+ * (team, groupTier, pairNumber) key: a matching existing pair has its
+ * player names updated in place (so any matches already generated for it
+ * stay valid); a new key creates a new pair. This lets an admin save a
+ * roster incrementally, in separate submissions (one team at a time, or a
+ * few pairs at a time) without earlier saves disappearing. To fully start
+ * over, use clearRoster() explicitly instead. Runs as a single transaction
+ * so a failure at any step leaves the previous dataset intact.
  */
 export async function saveRosterRows(rows: NormalizedRosterRow[]): Promise<SaveRosterResult> {
-  const teamsInSubmission = Array.from(new Set(rows.map((row) => row.team)));
-
   return prisma.$transaction(async (tx) => {
-    await tx.team.upsert({ where: { code: "A" }, create: { code: "A" }, update: {} });
-    await tx.team.upsert({ where: { code: "B" }, create: { code: "B" }, update: {} });
+    const teamA = await tx.team.upsert({ where: { code: "A" }, create: { code: "A" }, update: {} });
+    const teamB = await tx.team.upsert({ where: { code: "B" }, create: { code: "B" }, update: {} });
 
-    await tx.pair.deleteMany({ where: { team: { code: { in: teamsInSubmission } } } });
+    const teamIdByCode: Record<TeamCode, string> = { A: teamA.id, B: teamB.id };
 
-    const teams = await tx.team.findMany({ where: { code: { in: teamsInSubmission } } });
-    const teamIdByCode = Object.fromEntries(teams.map((team) => [team.code, team.id])) as Record<
-      TeamCode,
-      string
-    >;
-
-    await tx.pair.createMany({
-      data: rows.map((row) => ({
-        teamId: teamIdByCode[row.team],
-        groupTier: row.groupTier,
-        pairNumber: row.pairNumber,
-        player1Name: row.player1Name,
-        player2Name: row.player2Name,
-      })),
-    });
+    for (const row of rows) {
+      const teamId = teamIdByCode[row.team];
+      await tx.pair.upsert({
+        where: {
+          teamId_groupTier_pairNumber: {
+            teamId,
+            groupTier: row.groupTier,
+            pairNumber: row.pairNumber,
+          },
+        },
+        create: {
+          teamId,
+          groupTier: row.groupTier,
+          pairNumber: row.pairNumber,
+          player1Name: row.player1Name,
+          player2Name: row.player2Name,
+        },
+        update: {
+          player1Name: row.player1Name,
+          player2Name: row.player2Name,
+        },
+      });
+    }
 
     const [teamACount, teamBCount] = await Promise.all([
-      tx.pair.count({ where: { team: { code: "A" } } }),
-      tx.pair.count({ where: { team: { code: "B" } } }),
+      tx.pair.count({ where: { teamId: teamA.id } }),
+      tx.pair.count({ where: { teamId: teamB.id } }),
     ]);
 
     return { teamACount, teamBCount };
   });
+}
+
+/**
+ * Explicitly wipes every saved pair (and, via FK cascade, every generated
+ * match) so the admin can start the roster over from scratch. This is the
+ * only thing that deletes roster data — saving never does.
+ */
+export async function clearRoster(): Promise<void> {
+  await prisma.pair.deleteMany({});
 }
 
 export interface RosterSummary {
