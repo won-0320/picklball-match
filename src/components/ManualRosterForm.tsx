@@ -70,7 +70,7 @@ export default function ManualRosterForm() {
     }
 
     setSuccessMessage(
-      `명단 저장 완료: A팀 ${result.data!.teamACount}조, B팀 ${result.data!.teamBCount}조. 대진표는 아래 "대진 생성"에서 별도로 만들어주세요.`
+      `명단 저장 완료: 백팀 ${result.data!.teamACount}조, 청팀 ${result.data!.teamBCount}조. 대진표는 아래 "대진 생성"에서 별도로 만들어주세요.`
     );
     router.refresh();
   }
@@ -104,8 +104,8 @@ export default function ManualRosterForm() {
                     onChange={(e) => updateRow(row.key, { team: e.target.value as "A" | "B" })}
                     className="border rounded px-1 py-0.5"
                   >
-                    <option value="A">A</option>
-                    <option value="B">B</option>
+                    <option value="A">백팀</option>
+                    <option value="B">청팀</option>
                   </select>
                 </td>
                 <td className="pr-2 py-1">

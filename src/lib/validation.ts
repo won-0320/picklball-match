@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 const TEAM_LABEL_TO_CODE: Record<string, "A" | "B"> = {
+  백: "A",
+  청: "B",
+  백팀: "A",
+  청팀: "B",
+  // 이전 표기도 계속 허용 (기존 엑셀 호환)
   A: "A",
   B: "B",
   팀A: "A",
@@ -66,7 +71,7 @@ export function validateRosterRow(
 
   const team = TEAM_LABEL_TO_CODE[teamLabel];
   if (!team) {
-    errors.push(`${rowNumber}행: 팀 값은 'A' 또는 'B'여야 합니다 (입력값: '${teamLabel}')`);
+    errors.push(`${rowNumber}행: 팀 값은 '백' 또는 '청'이어야 합니다 (입력값: '${teamLabel}')`);
   }
 
   const groupTier = GROUP_LABEL_TO_TIER[groupLabel];

@@ -62,10 +62,10 @@ export default function ScheduleGenerator({ summary }: { summary: RosterSummary 
       </p>
       <div className="text-sm text-gray-700">
         <div>
-          3.5 이상: A팀 {summary.teamAUpper}조 · B팀 {summary.teamBUpper}조
+          3.5 이상: 백팀 {summary.teamAUpper}조 · 청팀 {summary.teamBUpper}조
         </div>
         <div>
-          3.0 이하: A팀 {summary.teamALower}조 · B팀 {summary.teamBLower}조
+          3.0 이하: 백팀 {summary.teamALower}조 · 청팀 {summary.teamBLower}조
         </div>
         <div className="text-gray-400">현재 생성된 매치: {summary.matchCount}개</div>
       </div>

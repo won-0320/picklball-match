@@ -78,7 +78,7 @@ export default function ScoreEntryModal({
             value={teamAScore}
             onChange={(e) => setTeamAScore(e.target.value)}
             className="w-20 border rounded px-2 py-1 text-center"
-            placeholder="A팀"
+            placeholder="백팀"
           />
           <span>:</span>
           <input
@@ -88,7 +88,7 @@ export default function ScoreEntryModal({
             value={teamBScore}
             onChange={(e) => setTeamBScore(e.target.value)}
             className="w-20 border rounded px-2 py-1 text-center"
-            placeholder="B팀"
+            placeholder="청팀"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
