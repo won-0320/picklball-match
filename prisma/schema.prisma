@@ -57,6 +57,9 @@ model Pair {
 model Match {
   id          String      @id @default(cuid())
   groupTier   GroupTier
+  // Sequential match number within a group tier, fixed at schedule
+  // generation time so it never shifts when scores are entered later.
+  gameNumber  Int
   teamAPair   Pair        @relation("PairA", fields: [teamAPairId], references: [id], onDelete: Cascade)
   teamAPairId String
   teamBPair   Pair        @relation("PairB", fields: [teamBPairId], references: [id], onDelete: Cascade)

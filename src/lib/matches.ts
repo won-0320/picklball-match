@@ -30,13 +30,13 @@ export async function getMatchListData(): Promise<MatchListData> {
     computeStandings(),
     prisma.match.findMany({
       include: { teamAPair: true, teamBPair: true },
-      orderBy: [{ createdAt: "asc" }],
+      orderBy: [{ groupTier: "asc" }, { gameNumber: "asc" }],
     }),
   ]);
 
-  const toDTO = (match: (typeof matches)[number], gameNumber: number): MatchDTO => ({
+  const toDTO = (match: (typeof matches)[number]): MatchDTO => ({
     id: match.id,
-    gameNumber,
+    gameNumber: match.gameNumber,
     groupTier: match.groupTier,
     status: match.status,
     teamAScore: match.teamAScore,
@@ -55,11 +55,7 @@ export async function getMatchListData(): Promise<MatchListData> {
 
   return {
     standings,
-    upper: matches
-      .filter((m) => m.groupTier === "UPPER")
-      .map((m, i) => toDTO(m, i + 1)),
-    lower: matches
-      .filter((m) => m.groupTier === "LOWER")
-      .map((m, i) => toDTO(m, i + 1)),
+    upper: matches.filter((m) => m.groupTier === "UPPER").map(toDTO),
+    lower: matches.filter((m) => m.groupTier === "LOWER").map(toDTO),
   };
 }
