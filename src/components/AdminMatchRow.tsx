@@ -50,6 +50,9 @@ export default function AdminMatchRow({ match }: { match: MatchDTO }) {
   return (
     <div className="border rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-sm bg-white">
       <div>
+        <div className="text-xs font-semibold text-gray-500 mb-1">
+          {match.gameNumber}경기
+        </div>
         <div>
           {match.teamAPair.pairNumber}조 ({match.teamAPair.player1Name}/{match.teamAPair.player2Name})
         </div>

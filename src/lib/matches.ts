@@ -10,6 +10,7 @@ export interface MatchPairDTO {
 
 export interface MatchDTO {
   id: string;
+  gameNumber: number;
   groupTier: GroupTier;
   status: MatchStatus;
   teamAScore: number | null;
@@ -33,8 +34,9 @@ export async function getMatchListData(): Promise<MatchListData> {
     }),
   ]);
 
-  const toDTO = (match: (typeof matches)[number]): MatchDTO => ({
+  const toDTO = (match: (typeof matches)[number], gameNumber: number): MatchDTO => ({
     id: match.id,
+    gameNumber,
     groupTier: match.groupTier,
     status: match.status,
     teamAScore: match.teamAScore,
@@ -53,7 +55,11 @@ export async function getMatchListData(): Promise<MatchListData> {
 
   return {
     standings,
-    upper: matches.filter((m) => m.groupTier === "UPPER").map(toDTO),
-    lower: matches.filter((m) => m.groupTier === "LOWER").map(toDTO),
+    upper: matches
+      .filter((m) => m.groupTier === "UPPER")
+      .map((m, i) => toDTO(m, i + 1)),
+    lower: matches
+      .filter((m) => m.groupTier === "LOWER")
+      .map((m, i) => toDTO(m, i + 1)),
   };
 }

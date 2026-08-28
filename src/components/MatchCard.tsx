@@ -25,6 +25,9 @@ export default function MatchCard({
       }`}
     >
       <div className="text-sm">
+        <div className="text-xs font-semibold text-gray-500 mb-1">
+          {match.gameNumber}경기
+        </div>
         <div>{pairLabel(match.teamAPair)}</div>
         <div className="text-gray-400 text-xs my-0.5">vs</div>
         <div>{pairLabel(match.teamBPair)}</div>

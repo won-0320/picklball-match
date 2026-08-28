@@ -60,6 +60,9 @@ export default function ScoreEntryModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-sm text-gray-600">
+          <div className="text-xs font-semibold text-gray-500 mb-1">
+            {match.gameNumber}경기
+          </div>
           <div>
             {match.teamAPair.pairNumber}조 ({match.teamAPair.player1Name}/
             {match.teamAPair.player2Name})
