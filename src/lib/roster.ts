@@ -68,6 +68,75 @@ export async function clearRoster(): Promise<void> {
   await prisma.pair.deleteMany({});
 }
 
+export interface RosterPair {
+  id: string;
+  team: TeamCode;
+  groupTier: GroupTier;
+  pairNumber: number;
+  player1Name: string;
+  player2Name: string;
+}
+
+/**
+ * Returns every saved pair so the admin can see and edit the current
+ * roster. Sorted by team (A, then B), then group tier (UPPER, then LOWER),
+ * then pair number.
+ */
+export async function getRosterPairs(): Promise<RosterPair[]> {
+  const pairs = await prisma.pair.findMany({
+    select: {
+      id: true,
+      groupTier: true,
+      pairNumber: true,
+      player1Name: true,
+      player2Name: true,
+      team: { select: { code: true } },
+    },
+  });
+
+  const teamOrder: Record<TeamCode, number> = { A: 0, B: 1 };
+  const tierOrder: Record<GroupTier, number> = { UPPER: 0, LOWER: 1 };
+
+  return pairs
+    .map((pair) => ({
+      id: pair.id,
+      team: pair.team.code,
+      groupTier: pair.groupTier,
+      pairNumber: pair.pairNumber,
+      player1Name: pair.player1Name,
+      player2Name: pair.player2Name,
+    }))
+    .sort(
+      (a, b) =>
+        teamOrder[a.team] - teamOrder[b.team] ||
+        tierOrder[a.groupTier] - tierOrder[b.groupTier] ||
+        a.pairNumber - b.pairNumber
+    );
+}
+
+/**
+ * Updates a single saved pair's player names in place. The pair keeps its
+ * id, so any matches already generated for it stay valid.
+ */
+export async function updatePairPlayers(
+  id: string,
+  player1Name: string,
+  player2Name: string
+): Promise<void> {
+  await prisma.pair.update({
+    where: { id },
+    data: { player1Name, player2Name },
+  });
+}
+
+/**
+ * Deletes a single saved pair. Any matches involving it are removed too
+ * via FK cascade, so re-generate the schedule afterwards if matches exist.
+ */
+export async function deletePair(id: string): Promise<void> {
+  await prisma.pair.delete({ where: { id } });
+}
+
 export interface RosterSummary {
   teamAUpper: number;
   teamALower: number;

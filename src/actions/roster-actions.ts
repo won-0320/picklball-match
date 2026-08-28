@@ -6,6 +6,8 @@ import {
   saveRosterRows,
   generateSchedule,
   clearRoster,
+  updatePairPlayers,
+  deletePair,
   type SaveRosterResult,
 } from "@/lib/roster";
 import type { RawRosterRow } from "@/lib/validation";
@@ -78,6 +80,39 @@ export async function generateMatches(): Promise<GenerateMatchesResult> {
 
   const { matchCount } = await generateSchedule();
   return { success: true, matchCount };
+}
+
+export interface MutatePairResult {
+  success: boolean;
+  message?: string;
+}
+
+export async function updatePairAction(
+  id: string,
+  player1Name: string,
+  player2Name: string
+): Promise<MutatePairResult> {
+  if (!(await isAdminAuthenticated())) {
+    return { success: false, message: "관리자 인증이 필요합니다." };
+  }
+
+  const p1 = player1Name.trim();
+  const p2 = player2Name.trim();
+  if (!p1 || !p2) {
+    return { success: false, message: "선수1과 선수2 이름을 모두 입력해주세요." };
+  }
+
+  await updatePairPlayers(id, p1, p2);
+  return { success: true };
+}
+
+export async function deletePairAction(id: string): Promise<MutatePairResult> {
+  if (!(await isAdminAuthenticated())) {
+    return { success: false, message: "관리자 인증이 필요합니다." };
+  }
+
+  await deletePair(id);
+  return { success: true };
 }
 
 export interface ClearRosterResult {

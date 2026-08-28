@@ -2,9 +2,10 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { logoutAdmin } from "@/actions/auth-actions";
 import { getMatchListData } from "@/lib/matches";
-import { getRosterSummary } from "@/lib/roster";
+import { getRosterSummary, getRosterPairs } from "@/lib/roster";
 import UploadForm from "@/components/UploadForm";
 import ManualRosterForm from "@/components/ManualRosterForm";
+import RosterEditor from "@/components/RosterEditor";
 import ScheduleGenerator from "@/components/ScheduleGenerator";
 import SettingsForm from "@/components/SettingsForm";
 import AdminMatchList from "@/components/AdminMatchList";
@@ -16,7 +17,11 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const [data, rosterSummary] = await Promise.all([getMatchListData(), getRosterSummary()]);
+  const [data, rosterSummary, rosterPairs] = await Promise.all([
+    getMatchListData(),
+    getRosterSummary(),
+    getRosterPairs(),
+  ]);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 space-y-8 w-full">
@@ -30,6 +35,7 @@ export default async function AdminPage() {
       </div>
       <UploadForm />
       <ManualRosterForm />
+      <RosterEditor pairs={rosterPairs} />
       <ScheduleGenerator summary={rosterSummary} />
       <SettingsForm pointsPerWin={data.standings.pointsPerWin} />
       <AdminMatchList upper={data.upper} lower={data.lower} />
